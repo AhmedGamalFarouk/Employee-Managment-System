@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useState, useMemo } from 'react';
 import { FaExclamationCircle, FaCheckCircle, FaEye, FaEyeSlash } from 'react-icons/fa';
 import { cn } from '../../utils/cn';
 
@@ -36,7 +36,9 @@ export const Input = forwardRef(({
     const [showPassword, setShowPassword] = useState(false);
     const [isFocused, setIsFocused] = useState(false);
 
-    const id = props.id || props.name || `input-${Math.random().toString(36).slice(2, 9)}`;
+    // Generate a stable fallback ID that doesn't change on re-renders
+    const fallbackId = useMemo(() => `input-${Math.random().toString(36).slice(2, 9)}`, []);
+    const id = props.id || props.name || fallbackId;
     const isPassword = type === 'password';
     const inputType = isPassword && showPassword ? 'text' : type;
 

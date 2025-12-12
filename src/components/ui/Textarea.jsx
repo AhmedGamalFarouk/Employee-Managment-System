@@ -1,4 +1,4 @@
-import { forwardRef, useState } from 'react';
+import { forwardRef, useState, useMemo } from 'react';
 import { FaExclamationCircle, FaCheckCircle } from 'react-icons/fa';
 import { cn } from '../../utils/cn';
 
@@ -36,7 +36,9 @@ export const Textarea = forwardRef(({
     const [charCount, setCharCount] = useState(props.value?.length || props.defaultValue?.length || 0);
     const [isFocused, setIsFocused] = useState(false);
 
-    const id = props.id || props.name || `textarea-${Math.random().toString(36).slice(2, 9)}`;
+    // Generate a stable fallback ID that doesn't change on re-renders
+    const fallbackId = useMemo(() => `textarea-${Math.random().toString(36).slice(2, 9)}`, []);
+    const id = props.id || props.name || fallbackId;
     const hasError = Boolean(error);
     const hasSuccess = Boolean(success) && !hasError;
 

@@ -1,4 +1,4 @@
-import { useEffect, useRef, Fragment } from 'react';
+import { useEffect, useRef, Fragment, useCallback } from 'react';
 import { createPortal } from 'react-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import { FaTimes } from 'react-icons/fa';
@@ -36,6 +36,7 @@ export const Modal = ({
 }) => {
     const modalRef = useRef(null);
     const previousActiveElement = useRef(null);
+    const hasFocusedRef = useRef(false);
 
     // Size variants
     const sizes = {
@@ -46,46 +47,68 @@ export const Modal = ({
         full: 'max-w-7xl mx-4',
     };
 
+    // Store onClose in a ref to avoid useEffect dependency issues
+    const onCloseRef = useRef(onClose);
+    useEffect(() => {
+        onCloseRef.current = onClose;
+    }, [onClose]);
+
     // Focus trap and keyboard handling
     useEffect(() => {
-        if (!isOpen) return;
+        if (!isOpen) {
+            // Reset focus tracking when modal closes
+            hasFocusedRef.current = false;
+            return;
+        }
 
-        // Store previously focused element
-        previousActiveElement.current = document.activeElement;
+        // Store previously focused element (only on first open)
+        if (!hasFocusedRef.current) {
+            previousActiveElement.current = document.activeElement;
+        }
 
-        // Focus first focusable element in modal
+        // Focus first focusable element in modal (only once when modal opens)
         const focusableElements = modalRef.current?.querySelectorAll(
             'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
         const firstElement = focusableElements?.[0];
         const lastElement = focusableElements?.[focusableElements.length - 1];
 
-        firstElement?.focus();
+        // Only focus on initial open, not on every re-render
+        if (!hasFocusedRef.current && firstElement) {
+            firstElement.focus();
+            hasFocusedRef.current = true;
+        }
 
         // Handle Tab key for focus trap
         const handleTab = (e) => {
             if (e.key === 'Tab') {
-                if (focusableElements.length === 1) {
+                const currentFocusableElements = modalRef.current?.querySelectorAll(
+                    'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+                );
+                const currentFirstElement = currentFocusableElements?.[0];
+                const currentLastElement = currentFocusableElements?.[currentFocusableElements.length - 1];
+
+                if (currentFocusableElements.length === 1) {
                     e.preventDefault();
                     return;
                 }
 
                 if (e.shiftKey) {
-                    if (document.activeElement === firstElement) {
+                    if (document.activeElement === currentFirstElement) {
                         e.preventDefault();
-                        lastElement?.focus();
+                        currentLastElement?.focus();
                     }
                 } else {
-                    if (document.activeElement === lastElement) {
+                    if (document.activeElement === currentLastElement) {
                         e.preventDefault();
-                        firstElement?.focus();
+                        currentFirstElement?.focus();
                     }
                 }
             }
 
             // Handle Escape key
             if (e.key === 'Escape' && closeOnEscape) {
-                onClose();
+                onCloseRef.current?.();
             }
         };
 
@@ -102,7 +125,7 @@ export const Modal = ({
                 previousActiveElement.current.focus();
             }
         };
-    }, [isOpen, onClose, closeOnEscape]);
+    }, [isOpen, closeOnEscape]);
 
     // Handle backdrop click
     const handleBackdropClick = (e) => {

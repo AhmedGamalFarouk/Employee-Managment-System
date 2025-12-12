@@ -1,13 +1,14 @@
 import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import { getEmployeeById } from '../utils/localEmployees';
-import { FaPhone, FaWhatsapp, FaEnvelope, FaUserPlus, FaLinkedin, FaShareAlt, FaBolt, FaUser } from 'react-icons/fa';
+import { FaPhone, FaWhatsapp, FaEnvelope, FaUserPlus, FaLinkedin, FaShareAlt, FaBolt, FaUser, FaArrowLeft } from 'react-icons/fa';
 import { saveAs } from 'file-saver';
 import { motion } from 'framer-motion';
 import { Button, Spinner, Badge } from '../components/ui';
 
 const Profile = () => {
     const { id } = useParams();
+    const navigate = useNavigate();
     const [employee, setEmployee] = useState(null);
     const [loading, setLoading] = useState(true);
 
@@ -66,6 +67,18 @@ END:VCARD`;
 
     return (
         <div className="min-h-screen bg-gray-900 flex justify-center items-center p-4 font-sans relative overflow-hidden">
+            {/* Back Button */}
+            <motion.button
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.5 }}
+                onClick={() => navigate('/admin')}
+                className="fixed top-6 left-6 z-50 flex items-center gap-2 px-4 py-2.5 rounded-xl bg-white/10 backdrop-blur-md border border-white/10 text-white hover:bg-white/20 hover:border-gold-500/30 transition-all duration-300 group"
+            >
+                <FaArrowLeft className="text-sm group-hover:text-gold-400 transition-colors" />
+                <span className="text-sm font-medium">Back</span>
+            </motion.button>
+
             {/* Ambient Background */}
             <div className="absolute inset-0 pointer-events-none">
                 <div className="absolute top-[-20%] right-[-20%] w-[80%] h-[80%] bg-gold-600/10 rounded-full blur-[120px]" />
@@ -111,17 +124,9 @@ END:VCARD`;
                                 className="p-1.5 rounded-full bg-gradient-to-br from-gold-300 via-gold-500 to-gold-700 shadow-gold-lg"
                             >
                                 <div className="p-1 bg-gray-900 rounded-full">
-                                    {employee.image_url ? (
-                                        <img
-                                            src={employee.image_url}
-                                            alt={employee.name}
-                                            className="w-32 h-32 rounded-full object-cover border-2 border-gray-800"
-                                        />
-                                    ) : (
-                                        <div className="w-32 h-32 rounded-full border-2 border-gray-800 bg-gray-800 flex items-center justify-center text-gray-400">
-                                            <FaUser className="text-5xl" />
-                                        </div>
-                                    )}
+                                    <div className="w-32 h-32 rounded-full border-2 border-gray-800 bg-gradient-to-br from-gray-800 to-gray-900 flex items-center justify-center">
+                                        <FaUser className="text-5xl text-gold-400" />
+                                    </div>
                                 </div>
                             </motion.div>
 
