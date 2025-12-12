@@ -13,7 +13,6 @@
     "deploy": "gh-pages -d dist"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.86.0",
     "autoprefixer": "^10.4.22",
     "clsx": "^2.1.1",
     "file-saver": "^2.0.5",

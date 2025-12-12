@@ -1,10 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { supabase } from '../supabaseClient';
-import { FaPhone, FaWhatsapp, FaEnvelope, FaUserPlus, FaLinkedin, FaGlobe, FaMapMarkerAlt, FaShareAlt, FaBolt, FaUser } from 'react-icons/fa';
+import { getEmployeeById } from '../utils/localEmployees';
+import { FaPhone, FaWhatsapp, FaEnvelope, FaUserPlus, FaLinkedin, FaShareAlt, FaBolt, FaUser } from 'react-icons/fa';
 import { saveAs } from 'file-saver';
 import { motion } from 'framer-motion';
-import { Button, Spinner, Badge, Card } from '../components/ui';
+import { Button, Spinner, Badge } from '../components/ui';
 
 const Profile = () => {
     const { id } = useParams();
@@ -15,18 +15,13 @@ const Profile = () => {
         fetchEmployee();
     }, [id]);
 
-    const fetchEmployee = async () => {
+    const fetchEmployee = () => {
         try {
-            const { data, error } = await supabase
-                .from('employees')
-                .select('*')
-                .eq('id', id)
-                .single();
-
-            if (error) throw error;
+            // Get employee from localStorage
+            const data = getEmployeeById(id);
             setEmployee(data);
         } catch (error) {
-            console.error('Error fetching employee:', error.message);
+            console.error('Error fetching employee:', error?.message || error);
         } finally {
             setLoading(false);
         }
